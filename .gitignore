@@ -1,0 +1,34 @@
+# Laravel patterns
+dmr_laravel/.env
+dmr_laravel/.env.backup
+dmr_laravel/.env.production
+dmr_laravel/node_modules/
+dmr_laravel/vendor/
+dmr_laravel/public/build/
+dmr_laravel/public/hot/
+dmr_laravel/public/storage/
+dmr_laravel/storage/*.key
+dmr_laravel/storage/pail/
+dmr_laravel/.phpunit.result.cache
+dmr_laravel/.phpunit.cache/
+dmr_laravel/Homestead.json
+dmr_laravel/Homestead.yaml
+
+# Python/Django patterns
+dmr_recovery/__pycache__/
+dmr_recovery/*.py[cod]
+dmr_recovery/*$py.class
+dmr_recovery/.env
+dmr_recovery/venv/
+dmr_recovery/env/
+dmr_recovery/db.sqlite3
+
+# OS/IDE patterns
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+.fleet/
+.nova/
+.zed/
+*.log
