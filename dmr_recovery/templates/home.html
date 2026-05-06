@@ -1,0 +1,255 @@
+{% extends 'base.html' %}
+
+{% block title %}Home | Virja Industries - Premium Industrial Solutions{% endblock %}
+
+{% block content %}
+<!-- Hero Section / Slider -->
+{% if banners %}
+<div x-data="{ activeSlide: 0, slides: {{ banners.count }}, timer: null }"
+    x-init="timer = setInterval(() => { activeSlide = activeSlide === slides - 1 ? 0 : activeSlide + 1 }, 6000)"
+    class="relative w-full overflow-hidden group bg-gray-100">
+
+    <!-- Invisible spacer image to perfectly match container height to image aspect ratio -->
+    {% with banners|first as first_banner %}
+    <img src="{{ first_banner.image.url }}" class="w-full h-auto invisible pointer-events-none block" aria-hidden="true"
+        alt="">
+    {% endwith %}
+
+    {% for banner in banners %}
+    <div x-show="activeSlide === {{ forloop.counter0 }}"
+        class="absolute inset-0 transition-opacity duration-700 ease-in-out" x-transition:enter="opacity-0"
+        x-transition:enter-end="opacity-100" x-transition:leave="opacity-100" x-transition:leave-end="opacity-0">
+
+        <!-- Background Image -->
+        <div class="absolute inset-0">
+            <img src="{{ banner.image.url }}" alt="{{ banner.title }}" class="w-full h-full object-cover object-center">
+            <!-- Overlay Gradient -->
+            <div
+                class="absolute inset-0 bg-gradient-to-r from-gray-900/90 via-gray-900/60 to-transparent pointer-events-none">
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="absolute inset-0 flex items-center">
+            <div class="container mx-auto px-6 md:px-12 relative z-10">
+                <div class="max-w-2xl border-l-4 border-secondary pl-6 md:pl-8 overflow-hidden">
+                    <h2 x-show="activeSlide === {{ forloop.counter0 }}"
+                        x-transition:enter="transition ease-out duration-700 delay-300 transform"
+                        x-transition:enter-start="opacity-0 -translate-x-12"
+                        x-transition:enter-end="opacity-100 translate-x-0"
+                        class="text-2xl sm:text-2xl md:text-5xl font-bold text-white uppercase tracking-tight mb-2 md:mb-4 drop-shadow-md leading-tight">
+                        {{ banner.title }}
+                    </h2>
+
+                    {% if banner.link %}
+                    <div x-show="activeSlide === {{ forloop.counter0 }}"
+                        x-transition:enter="transition ease-out duration-700 delay-500"
+                        x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
+                        <a href="{{ banner.link }}"
+                            class="inline-block bg-secondary text-white px-4 py-2 md:px-8 md:py-3 rounded text-xs md:text-sm font-bold uppercase tracking-wider hover:bg-red-700 transition shadow-lg">
+                            View Products
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    <!-- Slider Controls -->
+    {% if banners|length > 1 %}
+    <div class="absolute bottom-4 md:bottom-8 right-4 md:right-8 flex space-x-1 md:space-x-2 z-20">
+        <button @click="clearInterval(timer); activeSlide = activeSlide === 0 ? slides - 1 : activeSlide - 1"
+            class="w-6 h-6 md:w-10 md:h-10 flex items-center justify-center bg-gray-800/80 text-white hover:bg-secondary transition rounded text-xs md:text-base">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        <button @click="clearInterval(timer); activeSlide = activeSlide === slides - 1 ? 0 : activeSlide + 1"
+            class="w-6 h-6 md:w-10 md:h-10 flex items-center justify-center bg-gray-800/80 text-white hover:bg-secondary transition rounded text-xs md:text-base">
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </div>
+
+    <!-- Dots -->
+    <div class="absolute bottom-4 md:bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-2 z-20">
+        {% for banner in banners %}
+        <button @click="activeSlide = {{ forloop.counter0 }}"
+            class="w-2 h-2 md:w-3 md:h-3 rounded-full transition-colors duration-300"
+            :class="activeSlide === {{ forloop.counter0 }} ? 'bg-secondary ring-1 md:ring-2 ring-secondary ring-offset-1 md:ring-offset-2 ring-offset-black' : 'bg-gray-400 hover:bg-white'">
+        </button>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% else %}
+<section class="bg-gray-900 py-32 text-center text-white relative overflow-hidden">
+    <div class="absolute inset-0 bg-pattern opacity-10"></div>
+    <div class="container mx-auto px-4 relative z-10">
+        <h1 class="text-5xl md:text-7xl font-black mb-6 uppercase tracking-tight">{{ home_content.hero_fallback_title|default:'Industrial <span class="text-secondary">Excellence</span>'|safe }}
+        </h1>
+        <p class="text-xl text-gray-400 mb-10 max-w-2xl mx-auto font-light">{{ home_content.hero_fallback_text|default:"Premium tools, machinery, and safety equipment for professional applications."|safe }}</p>
+        <a href="/products/"
+            class="bg-white text-gray-900 px-8 py-3 rounded font-bold hover:bg-secondary hover:text-white transition uppercase tracking-widest text-sm">View
+            Catalog</a>
+    </div>
+</section>
+{% endif %}
+
+<!-- Features Strip -->
+{% if home_content.features_section_enabled %}
+<div class="bg-primary text-white py-12 border-b border-gray-800">
+    <div class="container mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8 text-center md:text-left">
+        {% for feature in home_features %}
+        <div
+            class="flex items-center justify-center md:justify-start gap-4 p-4 border border-gray-700 bg-gray-800 bg-opacity-50 rounded hover:border-secondary transition cursor-default">
+            <i class="{{ feature.icon }} text-secondary text-3xl"></i>
+            <div>
+                <h4 class="font-bold uppercase text-sm">{{ feature.title }}</h4>
+                <p class="text-xs text-gray-400">{{ feature.subtitle }}</p>
+            </div>
+        </div>
+        {% empty %}
+        <!-- Default features if none in DB -->
+        <div
+            class="flex items-center justify-center md:justify-start gap-4 p-4 border border-gray-700 bg-gray-800 bg-opacity-50 rounded hover:border-secondary transition cursor-default">
+            <i class="fas fa-shipping-fast text-secondary text-3xl"></i>
+            <div>
+                <h4 class="font-bold uppercase text-sm">Fast Delivery</h4>
+                <p class="text-xs text-gray-400">Nationwide Shipping</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+
+<!-- Featured Products -->
+<section class="py-20 bg-white">
+    <div class="container mx-auto px-4">
+        <div class="flex justify-between items-end mb-12 border-b border-gray-200 pb-4">
+            <div>
+                <span class="text-secondary font-bold tracking-widest uppercase text-xs">{{ home_content.featured_products_subtitle|default:"Top Picks" }}</span>
+                <h2 class="text-3xl font-black text-gray-900 uppercase mt-1">{{ home_content.featured_products_title|default:"Featured Products" }}</h2>
+            </div>
+            <a href="/products/"
+                class="text-gray-500 hover:text-secondary font-bold text-sm uppercase tracking-wide hidden md:block">
+                View All <i class="fas fa-arrow-right ml-1"></i>
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {% for product in featured_products %}
+            <div class="group bg-white rounded border border-gray-100 hover:border-gray-300 hover:shadow-xl transition-all duration-300 flex flex-col relative cursor-pointer"
+                onclick="window.location.href='/products/{{ product.slug }}/'">
+                <!-- Badges -->
+                <div class="absolute top-3 left-3 z-10 flex flex-col gap-2">
+                    {% if product.brand %}
+                    <span class="bg-gray-900 text-white text-[10px] uppercase font-bold px-2 py-1 rounded">
+                        {{ product.brand.name }}
+                    </span>
+                    {% endif %}
+                </div>
+
+                <!-- Image -->
+                <div class="h-64 overflow-hidden p-6 relative bg-gray-50 flex items-center justify-center">
+                    {% if product.main_image %}
+                    <img src="{{ product.main_image.url }}" alt="{{ product.name }}"
+                        class="max-w-full max-h-full object-contain group-hover:scale-110 transition duration-500 relative z-0">
+                    {% else %}
+                    <i class="fas fa-box text-gray-300 fa-4x relative z-0"></i>
+                    {% endif %}
+
+                    <!-- Quick Actions -->
+                    <div
+                        class="absolute bottom-0 left-0 w-full bg-white bg-opacity-95 p-2 flex justify-center gap-2 transform translate-y-full group-hover:translate-y-0 transition duration-300 border-t border-gray-100 z-20">
+                        <a href="/products/{{ product.slug }}/" class="text-gray-600 hover:text-primary p-2"
+                            title="View Details"><i class="fas fa-eye"></i></a>
+                        <a href="/products/{{ product.slug }}/" class="text-gray-600 hover:text-secondary p-2"
+                            title="Download Spec"><i class="fas fa-file-pdf"></i></a>
+                    </div>
+                </div>
+
+                <!-- Info -->
+                <div class="p-5 flex-grow flex flex-col">
+
+                    <h3
+                        class="font-bold text-gray-900 mb-2 leading-snug group-hover:text-secondary transition-colors line-clamp-2 min-h-[2.5rem]">
+                        <a href="/products/{{ product.slug }}/">{{ product.name }}</a>
+                    </h3>
+                    <div class="mt-auto">
+                        <a href="/products/{{ product.slug }}/"
+                            class="block w-full text-center border border-gray-200 text-gray-700 font-bold py-2 rounded text-sm hover:bg-primary hover:text-white hover:border-primary transition uppercase tracking-wide">
+                            View Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <p class="col-span-4 text-center text-gray-500">No products found.</p>
+            {% endfor %}
+        </div>
+
+        <div class="md:hidden text-center mt-8">
+            <a href="/products/" class="text-primary font-bold uppercase tracking-wide">
+                View All Products <i class="fas fa-arrow-right ml-1"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Brand Showcase -->
+<section class="py-16 bg-gray-50 border-t border-gray-200 overflow-hidden">
+    <div class="container mx-auto px-4 text-center">
+        <h2 class="text-lg font-bold text-gray-400 uppercase tracking-[0.3em] mb-10">{{ home_content.brands_title|default:"Trusted By Industry Leaders" }}</h2>
+        <!-- Marquee Container -->
+        <div class="flex overflow-hidden relative">
+            <!-- Single wrapper for all items (original + duplicate) to ensure connected flow -->
+            <div class="flex gap-12 animate-marquee whitespace-nowrap px-6">
+                <!-- Original -->
+                {% for brand in brands %}
+                <a href="/products/?brand={{ brand.slug }}"
+                    class="w-32 h-20 flex-shrink-0 flex items-center justify-center opacity-60 hover:opacity-100 transition grayscale hover:grayscale-0 duration-300">
+                    {% if brand.logo %}
+                    <img src="{{ brand.logo.url }}" alt="{{ brand.name }}" class="max-w-full max-h-full object-contain">
+                    {% else %}
+                    <span class="font-black text-xl text-gray-300 uppercase">{{ brand.name }}</span>
+                    {% endif %}
+                </a>
+                {% endfor %}
+
+                <!-- Duplicate -->
+                {% for brand in brands %}
+                <a href="/products/?brand={{ brand.slug }}"
+                    class="w-32 h-20 flex-shrink-0 flex items-center justify-center opacity-60 hover:opacity-100 transition grayscale hover:grayscale-0 duration-300">
+                    {% if brand.logo %}
+                    <img src="{{ brand.logo.url }}" alt="{{ brand.name }}" class="max-w-full max-h-full object-contain">
+                    {% else %}
+                    <span class="font-black text-xl text-gray-300 uppercase">{{ brand.name }}</span>
+                    {% endif %}
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Banner / CTA -->
+<section class="relative py-24 bg-primary text-white overflow-hidden">
+    <div class="absolute inset-0 bg-gray-900 opacity-50 z-0"></div>
+    <!-- Decorative Circle -->
+    <div class="absolute -right-20 -top-20 w-96 h-96 bg-secondary rounded-full opacity-20 blur-3xl"></div>
+
+    <div class="container mx-auto px-4 relative z-10 text-center">
+        <h2 class="text-4xl md:text-5xl font-black mb-6 leading-tight">{{ home_content.cta_title|default:"Ready to Optimize Your Production?" }}</h2>
+        <div class="text-gray-300 mb-10 max-w-2xl mx-auto text-xl font-light">{{ home_content.cta_text|default:"Get custom quotes, technical specifications, and bulk pricing for all your industrial needs."|safe }}</div>
+        <div class="flex flex-col sm:flex-row justify-center gap-4">
+            <a href="{{ home_content.cta_btn_link|default:" /contact/" }}"
+                class="bg-secondary text-white px-10 py-4 rounded font-bold hover:bg-white hover:text-secondary transition shadow-2xl uppercase tracking-widest text-sm transform hover:-translate-y-1">
+                {{ home_content.cta_btn_text|default:"Request a Quote" }}
+            </a>
+
+        </div>
+    </div>
+</section>
+{% endblock %}
