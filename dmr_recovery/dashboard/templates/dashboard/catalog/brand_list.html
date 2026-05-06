@@ -1,0 +1,112 @@
+{% extends 'dashboard/base_admin.html' %}
+
+{% block title %}Brands | Virja Admin{% endblock %}
+
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+    <h2 class="text-2xl font-bold text-gray-800">Brands</h2>
+    <div class="flex items-center gap-2">
+        <button id="bulkDeleteBtn" data-model="brand" class="hidden bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition flex items-center gap-2 whitespace-nowrap shadow-sm">
+            <i class="fas fa-trash"></i> Delete Selected (<span id="selectedCount">0</span>)
+        </button>
+        <a href="{% url 'dashboard:brand_create' %}"
+            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition flex items-center gap-2 whitespace-nowrap shadow-sm">
+            <i class="fas fa-plus"></i> Add Brand
+        </a>
+    </div>
+</div>
+
+<!-- Filters Bar -->
+<div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-6">
+    <form method="get" class="flex flex-col md:flex-row gap-3 items-end md:items-center w-full">
+        <!-- Search -->
+        <div class="flex-grow w-full md:w-auto">
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i class="fas fa-search text-gray-400"></i>
+                </div>
+                <input type="text" name="q" value="{{ request.GET.q }}" placeholder="Search brands by name..."
+                    class="w-full pl-10 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+            </div>
+        </div>
+
+        <!-- Featured Status -->
+        <div class="w-full md:w-48 flex-shrink-0">
+            <select name="featured"
+                class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white">
+                <option value="">All Status (Featured or Not)</option>
+                <option value="1" {% if '1' in selected_featured_list %}selected{% endif %}>Featured Only</option>
+                <option value="0" {% if '0' in selected_featured_list %}selected{% endif %}>Not Featured</option>
+            </select>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex gap-2 w-full md:w-auto flex-shrink-0">
+            <button type="submit"
+                class="flex-1 md:flex-none bg-gray-800 hover:bg-gray-900 text-white font-medium py-2 px-4 rounded-md transition-colors shadow-sm">
+                Filter
+            </button>
+            {% if request.GET.q or request.GET.featured %}
+            <a href="{% url 'dashboard:brand_list' %}"
+                class="flex-1 md:flex-none bg-red-50 hover:bg-red-100 text-red-600 font-medium py-2 px-4 rounded-md border border-red-200 transition-colors text-center shadow-sm"
+                title="Clear Filters">
+                Clear
+            </a>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+<div class="bg-white rounded-lg shadow overflow-x-auto border border-gray-200">
+    <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+            <tr>
+                <th class="px-6 py-3 text-left w-12"><input type="checkbox" id="selectAll" class="rounded border-gray-300 text-red-600 shadow-sm focus:border-red-300 focus:ring focus:ring-offset-0 focus:ring-red-200 focus:ring-opacity-50"></th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Logo</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Featured</th>
+                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+            {% for brand in brands %}
+            <tr class="hover:bg-gray-50">
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <input type="checkbox" class="rowCheckbox rounded border-gray-300 text-red-600 shadow-sm focus:border-red-300 focus:ring focus:ring-offset-0 focus:ring-red-200 focus:ring-opacity-50" value="{{ brand.id }}">
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    {% if brand.logo %}
+                    <img class="h-10 w-10 rounded object-cover" src="{{ brand.logo.url }}" alt="">
+                    {% else %}
+                    <div class="h-10 w-10 rounded bg-gray-100 flex items-center justify-center text-gray-400"><i
+                            class="fas fa-image"></i></div>
+                    {% endif %}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm font-medium text-gray-900">{{ brand.name }}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    {% if brand.is_featured %}
+                    <span
+                        class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Yes</span>
+                    {% else %}
+                    <span
+                        class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">No</span>
+                    {% endif %}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <a href="{% url 'dashboard:brand_edit' brand.pk %}"
+                        class="text-indigo-600 hover:text-indigo-900 mr-3"><i class="fas fa-edit"></i> Edit</a>
+                    <a href="{% url 'dashboard:brand_delete' brand.pk %}" class="text-red-600 hover:text-red-900"><i
+                            class="fas fa-trash"></i> Delete</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="px-6 py-4 text-center text-gray-500">No brands found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

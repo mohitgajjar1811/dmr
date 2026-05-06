@@ -1,0 +1,147 @@
+{% extends 'dashboard/base_admin.html' %}
+
+{% block title %}Enquiries | Virja Admin{% endblock %}
+
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+    <h2 class="text-2xl font-bold text-gray-800">{{ page_title|default:"Business Enquiries" }}</h2>
+    <div class="flex items-center gap-2">
+        <button id="bulkDeleteBtn" data-model="{% if page_title == 'Download Leads' %}lead{% else %}enquiry{% endif %}" class="hidden bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition flex items-center gap-2 whitespace-nowrap shadow-sm">
+            <i class="fas fa-trash"></i> Delete Selected (<span id="selectedCount">0</span>)
+        </button>
+        <button type="submit" form="filterForm" formaction="{% url export_url|default:'dashboard:enquiries_export' %}"
+            class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition flex items-center gap-2 whitespace-nowrap shadow-sm">
+            <i class="fas fa-file-excel"></i> Export Excel
+        </button>
+    </div>
+</div>
+
+<!-- Filters Bar -->
+<div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-6">
+    <form id="filterForm" method="get" class="flex flex-col md:flex-row gap-3 items-end md:items-center w-full">
+        <!-- Search -->
+        <div class="flex-grow w-full md:w-auto">
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i class="fas fa-search text-gray-400"></i>
+                </div>
+                <input type="text" name="q" value="{{ request.GET.q }}"
+                    placeholder="Search name, email, phone{% if page_title != 'Download Leads' %} or message{% endif %}..."
+                    class="w-full pl-10 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+            </div>
+        </div>
+
+        <!-- Status Filter -->
+        <div class="w-full md:w-40 flex-shrink-0">
+            <select name="status"
+                class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white">
+                <option value="">All Statuses</option>
+                <option value="new" {% if 'new' in selected_status_list %}selected{% endif %}>New (Unread)</option>
+                <option value="read" {% if 'read' in selected_status_list %}selected{% endif %}>Read</option>
+                <option value="replied" {% if 'replied' in selected_status_list %}selected{% endif %}>Replied</option>
+            </select>
+        </div>
+
+        <!-- Date Range -->
+        <div class="w-full md:w-auto flex items-center gap-2 flex-shrink-0">
+            <input type="date" name="date_from" value="{{ date_from }}" title="From Date"
+                class="w-full md:w-36 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-700 transition-colors cursor-pointer">
+            <span class="text-gray-500 text-sm font-medium">to</span>
+            <input type="date" name="date_to" value="{{ date_to }}" title="To Date"
+                class="w-full md:w-36 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-700 transition-colors cursor-pointer">
+        </div>
+
+        <!-- Actions -->
+        <div class="flex gap-2 w-full md:w-auto flex-shrink-0">
+            <button type="submit"
+                class="flex-1 md:flex-none bg-gray-800 hover:bg-gray-900 text-white font-medium py-2 px-4 rounded-md transition-colors shadow-sm">
+                Filter
+            </button>
+            {% if request.GET.q or request.GET.status or request.GET.date_from or request.GET.date_to %}
+            <a href="{% url clear_url|default:'dashboard:enquiry_list' %}"
+                class="flex-1 md:flex-none bg-red-50 hover:bg-red-100 text-red-600 font-medium py-2 px-4 rounded-md border border-red-200 transition-colors text-center shadow-sm"
+                title="Clear Filters">
+                Clear
+            </a>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+<div class="bg-white rounded-lg shadow overflow-x-auto border border-gray-200">
+    <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+            <tr>
+                <th class="px-6 py-3 text-left w-12"><input type="checkbox" id="selectAll" class="rounded border-gray-300 text-red-600 shadow-sm focus:border-red-300 focus:ring focus:ring-offset-0 focus:ring-red-200 focus:ring-opacity-50"></th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">From</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    {% if page_title == 'Download Leads' %}Downloaded Item{% else %}Message{% endif %}
+                </th>
+                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+            {% for enquiry in enquiries %}
+            <tr class="hover:bg-gray-50 {% if not enquiry.is_read %}bg-blue-50/30{% endif %}">
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <input type="checkbox" class="rowCheckbox rounded border-gray-300 text-red-600 shadow-sm focus:border-red-300 focus:ring focus:ring-offset-0 focus:ring-red-200 focus:ring-opacity-50" value="{{ enquiry.id }}">
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {{ enquiry.created_at|date:"M d, Y h:i A" }}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm font-medium text-gray-900">{{ enquiry.name }}</div>
+                    {% if enquiry.company_name %}
+                    <div class="text-xs text-gray-500">{{ enquiry.company_name }}</div>
+                    {% endif %}
+                    <div class="text-xs text-gray-500">{{ enquiry.email }}</div>
+                    <div class="text-xs text-gray-500">{{ enquiry.phone }}</div>
+                    {% if page_title != 'Download Leads' %}
+                    {% if enquiry.state %}<div class="text-xs text-gray-400">{{ enquiry.state }}</div>{% endif %}
+                    {% if enquiry.city %}<div class="text-xs text-gray-400">{{ enquiry.city }}</div>{% endif %}
+                    {% endif %}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    {% if enquiry.is_replied %}
+                    <span
+                        class="px-2.5 py-0.5 inline-flex items-center text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                        <i class="fas fa-check-circle mr-1.5 text-[10px]"></i> Replied
+                    </span>
+                    {% elif enquiry.is_read %}
+                    <span
+                        class="px-2.5 py-0.5 inline-flex items-center text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                        <i class="fas fa-envelope-open mr-1.5 text-[10px]"></i> Read
+                    </span>
+                    {% else %}
+                    <span
+                        class="px-2.5 py-0.5 inline-flex items-center text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                        <i class="fas fa-bell mr-1.5 text-[10px]"></i> New
+                    </span>
+                    {% endif %}
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">
+                    {% if enquiry.display_message %}{{ enquiry.display_message }}{% else %}{{ enquiry.message }}{% endif %}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    {% if page_title != 'Download Leads' %}
+                    <a href="{% url 'dashboard:enquiry_detail' enquiry.pk %}"
+                        class="text-indigo-600 hover:text-indigo-900 mr-3">
+                        <i class="fas fa-eye"></i> View & Reply
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'dashboard:enquiry_delete' enquiry.pk %}" class="text-red-600 hover:text-red-900">
+                        <i class="fas fa-trash"></i>{% if page_title == 'Download Leads' %} Delete{% endif %}
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="px-6 py-4 text-center text-gray-500">No enquiries found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
