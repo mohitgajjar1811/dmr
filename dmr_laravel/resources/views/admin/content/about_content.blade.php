@@ -2,9 +2,7 @@
 
 @section('title', 'About Page Content | DMR Admin')
 
-@section('extra_head')
-    <script src="https://cdn.ckeditor.com/ckeditor5/40.0.0/classic/ckeditor.js"></script>
-@endsection
+
 
 @section('content')
     <div class="mb-8">
@@ -40,7 +38,7 @@
                             <label class="block text-xs font-bold uppercase tracking-widest text-gray-700 mb-2">Detailed
                                 Content</label>
                             <textarea name="content" id="editor"
-                                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 outline-none">{{ $content->content }}</textarea>
+                                class="rich-editor w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 outline-none">{{ $content->content }}</textarea>
                         </div>
                         <div>
                             <label class="block text-xs font-bold uppercase tracking-widest text-gray-700 mb-2">Quote
@@ -75,15 +73,7 @@
         </div>
     </form>
 
-    <script>
-        ClassicEditor
-            .create(document.querySelector('#editor'), {
-                ckfinder: {
-                    uploadUrl: '{{ route('admin.upload.image') . '?_token=' . csrf_token() }}'
-                }
-            })
-            .catch(error => {
-                console.error(error);
-            });
-    </script>
+@push('scripts')
+    @include('admin.partials.ckeditor')
+@endpush
 @endsection

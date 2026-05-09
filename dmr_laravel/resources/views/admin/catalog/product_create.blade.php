@@ -35,7 +35,7 @@
                                 class="block text-xs font-bold uppercase tracking-widest text-gray-700 mb-2">Description</label>
                             <textarea name="description" id="description" rows="5"
                                 placeholder="Enter detailed product description..."
-                                class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all"></textarea>
+                                class="rich-editor w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all"></textarea>
                         </div>
 
                     </div>
@@ -105,54 +105,5 @@
 @endsection
 
 @push('scripts')
-    <script src="https://cdn.ckeditor.com/ckeditor5/41.1.0/classic/ckeditor.js"></script>
-    <script>
-        ClassicEditor
-            .create(document.querySelector('#description'), {
-                ckfinder: {
-                    uploadUrl: '{{ route('admin.upload.image') }}?_token={{ csrf_token() }}'
-                },
-                toolbar: {
-                    items: [
-                        'heading', '|',
-                        'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'blockQuote', '|',
-                        'insertTable', 'mediaEmbed', 'imageUpload', '|',
-                        'undo', 'redo'
-                    ]
-                }
-            })
-            .catch(error => {
-                console.error(error);
-            });
-    </script>
-    <style>
-        .ck-editor__editable {
-            min-height: 300px;
-            padding: 1.5rem !important;
-        }
-
-        .ck.ck-editor__main>.ck-editor__editable {
-            border-bottom-left-radius: 12px !important;
-            border-bottom-right-radius: 12px !important;
-            border-color: #e5e7eb !important;
-            box-shadow: none !important;
-        }
-
-        .ck.ck-toolbar {
-            border-top-left-radius: 12px !important;
-            border-top-right-radius: 12px !important;
-            border-color: #e5e7eb !important;
-            background-color: #f9fafb !important;
-            padding: 0.5rem !important;
-        }
-
-        .ck.ck-button:hover {
-            background-color: #fee2e2 !important;
-        }
-
-        .ck.ck-button.ck-on {
-            background-color: #ef4444 !important;
-            color: white !important;
-        }
-    </style>
+    @include('admin.partials.ckeditor')
 @endpush

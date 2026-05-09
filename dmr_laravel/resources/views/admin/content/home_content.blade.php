@@ -69,3 +69,7 @@
         </div>
     </form>
 @endsection
+
+@push('scripts')
+    @include('admin.partials.ckeditor')
+@endpush
