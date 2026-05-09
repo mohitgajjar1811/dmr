@@ -20,14 +20,16 @@ Route::patch('/cart/update', [CartController::class, 'update'])->name('cart.upda
 Route::delete('/cart/remove', [CartController::class, 'remove'])->name('cart.remove');
 
 // Default auth redirect
-Route::get('/login', function() { return redirect()->route('admin.login'); })->name('login');
+Route::get('/login', function () {
+    return redirect()->route('admin.login'); })->name('login');
 
 // Dashboard Routes
 Route::prefix('dashboard')->name('admin.')->group(function () {
-    Route::get('/login', function() { return view('admin.login'); })->name('login');
+    Route::get('/login', function () {
+        return view('admin.login'); })->name('login');
     Route::post('/login', [DashboardController::class, 'authenticate'])->name('login.post');
     Route::match(['get', 'post'], '/logout', [DashboardController::class, 'logout'])->name('logout');
-    
+
     Route::middleware(['auth'])->group(function () {
         Route::get('/', [DashboardController::class, 'home'])->name('home');
         Route::get('/products', [DashboardController::class, 'productList'])->name('product.list');
@@ -59,6 +61,16 @@ Route::prefix('dashboard')->name('admin.')->group(function () {
 
         Route::get('/newsletter', [DashboardController::class, 'newsletterList'])->name('newsletter.list');
         Route::delete('/newsletter/{id}', [DashboardController::class, 'newsletterDelete'])->name('newsletter.delete');
+        
+        // Home Page Content
+        Route::get('/home-content', [DashboardController::class, 'homeContent'])->name('home.content');
+        Route::post('/home-content', [DashboardController::class, 'homeContentUpdate'])->name('home.content.update');
+
+        // About Page Content
+        Route::get('/about-content', [DashboardController::class, 'aboutContent'])->name('about.content');
+        Route::post('/about-content', [DashboardController::class, 'aboutContentUpdate'])->name('about.content.update');
+        
         Route::get('/leads', [DashboardController::class, 'leadList'])->name('lead.list');
+        Route::post('/upload-image', [DashboardController::class, 'uploadImage'])->name('upload.image');
     });
 });

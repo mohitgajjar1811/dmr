@@ -10,6 +10,7 @@ use App\Models\Banner;
 use App\Models\NewsletterSubscriber;
 use App\Models\CompanyInfo;
 use App\Models\HomePageContent;
+use App\Models\AboutPageContent;
 use App\Models\SMTPSettings;
 use App\Models\HomeFeature;
 use Illuminate\Support\Facades\Auth;
@@ -311,5 +312,63 @@ class DashboardController extends Controller
         $settings = SMTPSettings::first() ?? new SMTPSettings();
         $settings->fill($request->all())->save();
         return back()->with('success', 'SMTP settings updated.');
+    }
+
+    public function homeContent()
+    {
+        $content = HomePageContent::first() ?? new HomePageContent();
+        return view('admin.content.home_content', compact('content'));
+    }
+
+    public function homeContentUpdate(Request $request)
+    {
+        $content = HomePageContent::first() ?? new HomePageContent();
+        $data = $request->all();
+
+        if ($request->hasFile('about_image_1')) {
+            $data['about_image_1'] = $request->file('about_image_1')->store('home', 'public');
+        }
+        if ($request->hasFile('about_image_2')) {
+            $data['about_image_2'] = $request->file('about_image_2')->store('home', 'public');
+        }
+        if ($request->hasFile('cta_background_image')) {
+            $data['cta_background_image'] = $request->file('cta_background_image')->store('home', 'public');
+        }
+
+        $content->fill($data)->save();
+        return back()->with('success', 'Home page content updated successfully.');
+    }
+
+    public function aboutContent()
+    {
+        $content = AboutPageContent::first() ?? new AboutPageContent();
+        return view('admin.content.about_content', compact('content'));
+    }
+
+    public function aboutContentUpdate(Request $request)
+    {
+        $content = AboutPageContent::first() ?? new AboutPageContent();
+        $content->fill($request->all())->save();
+        return back()->with('success', 'About page content updated successfully.');
+    }
+
+    public function uploadImage(Request $request)
+    {
+        if ($request->hasFile('upload')) {
+            $file = $request->file('upload');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $path = $file->storeAs('media', $fileName, 'public');
+
+            $url = asset('storage/' . $path);
+            return response()->json([
+                'uploaded' => true,
+                'url' => $url
+            ]);
+        }
+
+        return response()->json([
+            'uploaded' => false,
+            'error' => ['message' => 'No file uploaded.']
+        ]);
     }
 }

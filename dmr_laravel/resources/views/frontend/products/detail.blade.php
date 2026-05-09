@@ -140,33 +140,7 @@
                 </div>
             </div>
             
-            <!-- Logistics & Care Section -->
-            <div class="border-t border-gray-100 p-8 lg:p-12 bg-gray-50/30">
-                <h3 class="text-lg font-black uppercase tracking-widest text-gray-900 mb-8 border-b pb-4">Logistics & Handling</h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-gray-600">
-                    <div class="flex flex-col gap-3">
-                        <div class="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center text-secondary">
-                            <i class="fas fa-truck"></i>
-                        </div>
-                        <h4 class="font-bold text-gray-900 text-sm">Standard Shipping</h4>
-                        <p class="text-sm leading-relaxed">Swift delivery within 5-7 business days across India.</p>
-                    </div>
-                    <div class="flex flex-col gap-3">
-                        <div class="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center text-secondary">
-                            <i class="fas fa-box-open"></i>
-                        </div>
-                        <h4 class="font-bold text-gray-900 text-sm">Secure Packaging</h4>
-                        <p class="text-sm leading-relaxed">Industrial-grade crating and palletization to ensure zero damage.</p>
-                    </div>
-                    <div class="flex flex-col gap-3">
-                        <div class="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center text-secondary">
-                            <i class="fas fa-undo-alt"></i>
-                        </div>
-                        <h4 class="font-bold text-gray-900 text-sm">Return Policy</h4>
-                        <p class="text-sm leading-relaxed">7-day return policy for unused items in original packaging.</p>
-                    </div>
-                </div>
-            </div>
+
         </div>
     </div>
 </div>

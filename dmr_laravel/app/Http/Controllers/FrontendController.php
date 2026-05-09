@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Banner;
 use App\Models\HomePageContent;
+use App\Models\AboutPageContent;
 use App\Models\HomeFeature;
 
 class FrontendController extends Controller
@@ -22,15 +23,23 @@ class FrontendController extends Controller
 
     public function about()
     {
-        return view('frontend.about');
+        $about_content = AboutPageContent::first();
+        return view('frontend.about', compact('about_content'));
     }
 
     public function productList(Request $request)
     {
         $query = Product::where('is_active', true);
 
+        // Simple search if 'q' is present
+        if ($request->has('q')) {
+            $query->where('name', 'like', '%' . $request->q . '%');
+        }
+
+        $all_products = Product::where('is_active', true)->select('id', 'name', 'slug')->get();
         $products = $query->paginate(12);
-        return view('frontend.products.list', compact('products'));
+        
+        return view('frontend.products.list', compact('products', 'all_products'));
     }
 
     public function productDetail($slug)

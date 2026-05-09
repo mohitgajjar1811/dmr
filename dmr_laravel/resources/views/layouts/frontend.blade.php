@@ -202,19 +202,27 @@
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <i class="fas fa-search text-gray-400 group-focus-within:text-primary"></i>
                     </div>
-                    <input type="text" name="q" placeholder="Search products..."
-                        class="w-full border-2 border-gray-100 bg-gray-50 rounded-md pl-10 pr-4 py-2.5 focus:border-primary text-sm font-medium">
+                    <input type="text" name="q" value="{{ request('q') }}" placeholder="Search products..."
+                        class="w-full border-2 border-gray-100 bg-gray-50 rounded-md pl-10 pr-12 py-2.5 focus:border-primary text-sm font-medium">
+                    
+                    @if(request('q'))
+                    <a href="{{ route('products') }}" class="absolute right-16 top-1/2 -translate-y-1/2 text-gray-400 hover:text-secondary transition p-1">
+                        <i class="fas fa-times-circle"></i>
+                    </a>
+                    @endif
+
                     <button type="submit"
                         class="absolute right-1 top-1 bottom-1 bg-white text-primary font-bold px-4 rounded border border-gray-100">Find</button>
                 </form>
             </div>
 
-            <div class="flex items-center gap-6">
+            <div class="flex items-center gap-4">
                 <div class="hidden xl:block text-right">
                     <div class="text-[0.6rem] text-gray-400 font-bold uppercase tracking-wider">Sales Support</div>
                     <a href="tel:{{ $company_info->phone ?? '+911234567890' }}"
                         class="block text-sm font-black text-gray-800">{{ $company_info->phone ?? '+91 123 456 7890' }}</a>
                 </div>
+                
                 <a href="{{ route('cart.index') }}"
                     class="bg-secondary text-white px-4 py-2.5 rounded shadow-lg font-bold text-sm flex items-center relative">
                     <i class="fas fa-shopping-cart"></i>
@@ -222,6 +230,49 @@
                     <span x-text="cartCount"
                         class="absolute -top-2 -right-2 bg-gray-900 border-2 border-white text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-black"></span>
                 </a>
+
+                <!-- Mobile Menu Button -->
+                <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden text-2xl text-primary focus:outline-none p-1">
+                    <i class="fas" :class="mobileMenuOpen ? 'fa-times' : 'fa-bars'"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Dropdown -->
+        <div x-show="mobileMenuOpen" 
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 -translate-y-4"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100 translate-y-0"
+             x-transition:leave-end="opacity-0 -translate-y-4"
+             class="md:hidden bg-white border-t border-gray-100 shadow-xl absolute w-full left-0 z-40" 
+             x-cloak>
+            <div class="p-4 space-y-4">
+                <!-- Mobile Search -->
+                <form action="{{ route('products') }}" method="GET" class="relative">
+                    <input type="text" name="q" value="{{ request('q') }}" placeholder="Search products..."
+                           class="w-full border border-gray-200 bg-gray-50 rounded-md pl-10 pr-10 py-2 text-sm">
+                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                    
+                    @if(request('q'))
+                    <a href="{{ route('products') }}" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-secondary transition">
+                        <i class="fas fa-times-circle"></i>
+                    </a>
+                    @endif
+                </form>
+                
+                <ul class="space-y-1">
+                    <li><a href="{{ route('home') }}" class="block py-3 px-4 text-sm font-bold uppercase text-gray-700 hover:bg-gray-50 rounded-lg {{ request()->routeIs('home') ? 'text-secondary bg-red-50' : '' }}">Home</a></li>
+                    <li><a href="{{ route('products') }}" class="block py-3 px-4 text-sm font-bold uppercase text-gray-700 hover:bg-gray-50 rounded-lg {{ request()->routeIs('products') ? 'text-secondary bg-red-50' : '' }}">Products</a></li>
+                    <li><a href="{{ route('about') }}" class="block py-3 px-4 text-sm font-bold uppercase text-gray-700 hover:bg-gray-50 rounded-lg {{ request()->routeIs('about') ? 'text-secondary bg-red-50' : '' }}">About Us</a></li>
+                    <li><a href="{{ route('contact') }}" class="block py-3 px-4 text-sm font-bold uppercase text-gray-700 hover:bg-gray-50 rounded-lg {{ request()->routeIs('contact') ? 'text-secondary bg-red-50' : '' }}">Contact Us</a></li>
+                </ul>
+
+                <div class="pt-4 border-t border-gray-100">
+                    <div class="text-[0.6rem] text-gray-400 font-bold uppercase tracking-wider mb-1">Sales Support</div>
+                    <a href="tel:{{ $company_info->phone ?? '+911234567890' }}" class="text-sm font-black text-gray-800">{{ $company_info->phone ?? '+91 123 456 7890' }}</a>
+                </div>
             </div>
         </div>
 
@@ -230,16 +281,16 @@
             <div class="container mx-auto px-4">
                 <ul class="flex">
                     <li><a href="{{ route('home') }}"
-                            class="block py-3 px-6 text-sm font-bold uppercase hover:bg-white hover:text-primary transition">Home</a>
+                            class="block py-3 px-6 text-sm font-bold uppercase hover:bg-white hover:text-primary transition {{ request()->routeIs('home') ? 'bg-white text-primary' : '' }}">Home</a>
                     </li>
                     <li><a href="{{ route('products') }}"
-                            class="block py-3 px-6 text-sm font-bold uppercase hover:bg-white hover:text-primary transition">Products</a>
+                            class="block py-3 px-6 text-sm font-bold uppercase hover:bg-white hover:text-primary transition {{ request()->routeIs('products*') ? 'bg-white text-primary' : '' }}">Products</a>
                     </li>
                     <li><a href="{{ route('about') }}"
-                            class="block py-3 px-6 text-sm font-bold uppercase hover:bg-white hover:text-primary transition">About
+                            class="block py-3 px-6 text-sm font-bold uppercase hover:bg-white hover:text-primary transition {{ request()->routeIs('about') ? 'bg-white text-primary' : '' }}">About
                             Us</a></li>
                     <li><a href="{{ route('contact') }}"
-                            class="block py-3 px-6 text-sm font-bold uppercase hover:bg-white hover:text-primary transition">Contact
+                            class="block py-3 px-6 text-sm font-bold uppercase hover:bg-white hover:text-primary transition {{ request()->routeIs('contact') ? 'bg-white text-primary' : '' }}">Contact
                             Us</a></li>
                 </ul>
             </div>
